@@ -7,8 +7,6 @@
         <table_exists>hits_100m_single</table_exists>
     </preconditions>
 
-
-
     <query><![CDATA[SELECT count() FROM hits_100m_single WHERE match(URL, ' *tranio\\.ru/spain/*/commercial/*') settings max_threads=5]]></query>
 
     <query><![CDATA[select count(position(URL, 'yandex')), count(position(URL, 'google')) FROM hits_100m_single]]></query>
@@ -46,8 +44,4 @@
     <query><![CDATA[SELECT DISTINCT Title, multiFuzzyMatchAny(Title, 5, ['^metrika\\.ry$']) AS distance FROM hits_100m_single WHERE distance = 1]]></query>
     <query><![CDATA[SELECT sum(multiFuzzyMatchAny(Title, 3, ['hello$', 'world$', '^hello'])) FROM hits_100m_single]]></query>
     <query><![CDATA[SELECT count() FROM hits_100m_single WHERE multiFuzzyMatchAny(URL, 2, ['about/address', 'for_woman', '^https?://lm-company.ruy/$', 'ultimateguitar.com'])]]></query>
-
-
-
-
 </test>
