@@ -38,6 +38,7 @@ void HTTPServerConnection::run()
                     response.set("Server", server);
                 try
                 {
+                    // TODO 等价于std::unique_ptr<HTTPRequestHandler> handler = factory->createRequestHandler(request) ???
                     std::unique_ptr<HTTPRequestHandler> handler(factory->createRequestHandler(request));
 
                     if (handler)
