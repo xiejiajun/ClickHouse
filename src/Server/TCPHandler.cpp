@@ -516,6 +516,7 @@ bool TCPHandler::readDataNext(const size_t & poll_interval, const int & receive_
     }
 
     /// We accept and process data. And if they are over, then we leave.
+    // TODO 里面会触发Insert语句的数据写入到对应表
     if (!receivePacket())
         return false;
 
@@ -546,6 +547,7 @@ void TCPHandler::readData(const Settings & connection_settings)
     std::tie(poll_interval, receive_timeout) = getReadTimeouts(connection_settings);
     sendLogs();
 
+    // TODO 里面会触发Insert语句的数据写入
     while (readDataNext(poll_interval, receive_timeout))
         ;
 }
@@ -577,6 +579,7 @@ void TCPHandler::processInsertQuery(const Settings & connection_settings)
 
     try
     {
+        // TODO 里面会有触发数据写入的操作
         readData(connection_settings);
     }
     catch (...)
@@ -1026,6 +1029,7 @@ bool TCPHandler::receivePacket()
         case Protocol::Client::Scalar:
             if (state.empty())
                 receiveUnexpectedData();
+            // TODO 里面会触发Insert语句的数据写入
             return receiveData(packet_type == Protocol::Client::Scalar);
 
         case Protocol::Client::Ping:
@@ -1333,6 +1337,8 @@ bool TCPHandler::receiveData(bool scalar)
         else
         {
             /// INSERT query.
+            // TODO 触发insert into语句的数据写入操作 -> ... -> IStorage.write -> ... StorageMergeTree::write
+            //  -> MergeTreeBlockOutputStream.write
             state.io.out->write(block);
         }
         return true;

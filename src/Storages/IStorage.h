@@ -83,6 +83,7 @@ struct ColumnSize
   * - data lookups and appends;
   * - data storage structure (compression, etc.)
   * - concurrent access to data (locks, etc.)
+  * TODO IStorage 是Clickhouse存储引擎的接口，我们直接看最关键的 MergeTree引擎的实现
   */
 class IStorage : public std::enable_shared_from_this<IStorage>, public TypePromotion<IStorage>, public IHints<1, IStorage>
 {
@@ -299,6 +300,7 @@ public:
 
     /// Other version of read which adds reading step to query plan.
     /// Default implementation creates ReadFromStorageStep and uses usual read.
+    // TODO 数据读取接口
     virtual void read(
         QueryPlan & query_plan,
         const Names & /*column_names*/,
@@ -317,6 +319,7 @@ public:
       * passed in all parts of the returned streams. Storage metadata can be
       * changed during lifetime of the returned streams, but the snapshot is
       * guaranteed to be immutable.
+      * TODO 数据写入接口
       */
     virtual BlockOutputStreamPtr write(
         const ASTPtr & /*query*/,

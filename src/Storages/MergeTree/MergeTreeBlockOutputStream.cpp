@@ -21,6 +21,14 @@ void MergeTreeBlockOutputStream::writePrefix()
 }
 
 
+/**
+ * TODO 追踪到最底层的 MergeTreeBlockOutputStream 我们会发现最终数据由MergeTreeDataWriter(dbms/src/Storages/MergeTree/MergeTreeDataWriter.h)写入，
+ *  而MergeTreeDataWriter是MergeTreeData(dbms/src/Storages/MergeTree/MergeTreeData.h)的封装，MergeTree的数据都由MergeTreeData对象管理。
+ *  存储的格式可以看看[这篇文章](http://jackpgao.github.io/2017/12/06/ClickHouse-Primary-key/)，后面可能会另写文再说说。
+ *
+ *  TODO MergeTreeBlockOutputStream一次写入一个Block,然后会唤醒后台任务将一个个小的Block合并。这应该就是MergeTree命名的由来了。
+ *   由此我们可知，Clickhouse应尽可能的批量写入数据而不是一条一条的写。
+ */
 void MergeTreeBlockOutputStream::write(const Block & block)
 {
     auto part_blocks = storage.writer.splitBlockIntoParts(block, max_parts_per_block, metadata_snapshot);

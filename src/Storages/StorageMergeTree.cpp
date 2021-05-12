@@ -226,6 +226,7 @@ std::optional<UInt64> StorageMergeTree::totalBytes(const Settings &) const
 BlockOutputStreamPtr
 StorageMergeTree::write(const ASTPtr & /*query*/, const StorageMetadataPtr & metadata_snapshot, ContextPtr local_context)
 {
+    // TODO 写入 -> MergeTreeBlockOutputStream.write
     const auto & settings = local_context->getSettingsRef();
     return std::make_shared<MergeTreeBlockOutputStream>(
         *this, metadata_snapshot, settings.max_partitions_per_insert_block, local_context->getSettingsRef().optimize_on_insert);
