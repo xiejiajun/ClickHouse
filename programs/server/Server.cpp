@@ -933,6 +933,7 @@ int Server::main(const std::vector<std::string> & /*args*/)
                 servers_to_start_before_tables->emplace_back(
                     port_name,
                     std::make_unique<Poco::Net::TCPServer>(
+                        // TODO 处理网络请求的KeeperTCPHandler工厂
                         new KeeperTCPHandlerFactory(*this, false), server_pool, socket, new Poco::Net::TCPServerParams));
 
                 LOG_INFO(log, "Listening for connections to Keeper (tcp): {}", address.toString());
@@ -949,6 +950,7 @@ int Server::main(const std::vector<std::string> & /*args*/)
                 servers_to_start_before_tables->emplace_back(
                     secure_port_name,
                     std::make_unique<Poco::Net::TCPServer>(
+                        // TODO 处理网络请求的KeeperTCPHandler工厂
                         new KeeperTCPHandlerFactory(*this, true), server_pool, socket, new Poco::Net::TCPServerParams));
                 LOG_INFO(log, "Listening for connections to Keeper with secure protocol (tcp_secure): {}", address.toString());
 #else
@@ -1196,6 +1198,7 @@ int Server::main(const std::vector<std::string> & /*args*/)
                 socket.setReceiveTimeout(settings.receive_timeout);
                 socket.setSendTimeout(settings.send_timeout);
                 servers->emplace_back(port_name, std::make_unique<Poco::Net::TCPServer>(
+                    // TODO 处理网络请求的TCPHandler工厂
                     new TCPHandlerFactory(*this, /* secure */ false, /* proxy protocol */ false),
                     server_pool,
                     socket,
@@ -1213,6 +1216,7 @@ int Server::main(const std::vector<std::string> & /*args*/)
                 socket.setReceiveTimeout(settings.receive_timeout);
                 socket.setSendTimeout(settings.send_timeout);
                 servers->emplace_back(port_name, std::make_unique<Poco::Net::TCPServer>(
+                    // TODO 处理网络请求的TCPHandler工厂
                     new TCPHandlerFactory(*this, /* secure */ false, /* proxy protocol */ true),
                     server_pool,
                     socket,
@@ -1231,6 +1235,7 @@ int Server::main(const std::vector<std::string> & /*args*/)
                 socket.setReceiveTimeout(settings.receive_timeout);
                 socket.setSendTimeout(settings.send_timeout);
                 servers->emplace_back(port_name, std::make_unique<Poco::Net::TCPServer>(
+                    // TODO 处理网络请求的TCPHandler工厂
                     new TCPHandlerFactory(*this, /* secure */ true, /* proxy protocol */ false),
                     server_pool,
                     socket,
