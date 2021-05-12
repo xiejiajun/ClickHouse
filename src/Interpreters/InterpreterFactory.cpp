@@ -102,134 +102,166 @@ std::unique_ptr<IInterpreter> InterpreterFactory::get(ASTPtr & query, ContextPtr
     {
         /// This is internal part of ASTSelectWithUnionQuery.
         /// Even if there is SELECT without union, it is represented by ASTSelectWithUnionQuery with single ASTSelectQuery as a child.
+        // TODO Select DQL解释器
         return std::make_unique<InterpreterSelectQuery>(query, context, options);
     }
     else if (query->as<ASTSelectWithUnionQuery>())
     {
         ProfileEvents::increment(ProfileEvents::SelectQuery);
+        // TODO Select + Union DQL 解释器
         return std::make_unique<InterpreterSelectWithUnionQuery>(query, context, options);
     }
     else if (query->as<ASTInsertQuery>())
     {
         ProfileEvents::increment(ProfileEvents::InsertQuery);
         bool allow_materialized = static_cast<bool>(context->getSettingsRef().insert_allow_materialized_columns);
+        // TODO Insert DML解释器
         return std::make_unique<InterpreterInsertQuery>(query, context, allow_materialized);
     }
     else if (query->as<ASTCreateQuery>())
     {
+        // TODO Create DDL解释器
         return std::make_unique<InterpreterCreateQuery>(query, context);
     }
     else if (query->as<ASTDropQuery>())
     {
+        // TODO DROP DDL解释器
         return std::make_unique<InterpreterDropQuery>(query, context);
     }
     else if (query->as<ASTRenameQuery>())
     {
+        // TODO Rename DDL解释器
         return std::make_unique<InterpreterRenameQuery>(query, context);
     }
     else if (query->as<ASTShowTablesQuery>())
     {
+        // TODO show Tables解释器
         return std::make_unique<InterpreterShowTablesQuery>(query, context);
     }
     else if (query->as<ASTUseQuery>())
     {
+        // TODO use解释器
         return std::make_unique<InterpreterUseQuery>(query, context);
     }
     else if (query->as<ASTSetQuery>())
     {
         /// readonly is checked inside InterpreterSetQuery
+        // TODO set解释器
         return std::make_unique<InterpreterSetQuery>(query, context);
     }
     else if (query->as<ASTSetRoleQuery>())
     {
+        // TODO set role解释器
         return std::make_unique<InterpreterSetRoleQuery>(query, context);
     }
     else if (query->as<ASTOptimizeQuery>())
     {
+        // TODO optimize解释器
         return std::make_unique<InterpreterOptimizeQuery>(query, context);
     }
     else if (query->as<ASTExistsDatabaseQuery>())
     {
+        // TODO exists解释器
         return std::make_unique<InterpreterExistsQuery>(query, context);
     }
     else if (query->as<ASTExistsTableQuery>())
     {
+        // TODO exists解释器
         return std::make_unique<InterpreterExistsQuery>(query, context);
     }
     else if (query->as<ASTExistsViewQuery>())
     {
+        // TODO exists解释器
         return std::make_unique<InterpreterExistsQuery>(query, context);
     }
     else if (query->as<ASTExistsDictionaryQuery>())
     {
+        // TODO exists解释器
         return std::make_unique<InterpreterExistsQuery>(query, context);
     }
     else if (query->as<ASTShowCreateTableQuery>())
     {
+        // TODO show create table解释器
         return std::make_unique<InterpreterShowCreateQuery>(query, context);
     }
     else if (query->as<ASTShowCreateViewQuery>())
     {
+        // TODO show create view解释器
         return std::make_unique<InterpreterShowCreateQuery>(query, context);
     }
     else if (query->as<ASTShowCreateDatabaseQuery>())
     {
+        // TODO show create database解释器
         return std::make_unique<InterpreterShowCreateQuery>(query, context);
     }
     else if (query->as<ASTShowCreateDictionaryQuery>())
     {
+        // TODO show create Dictionary解释器
         return std::make_unique<InterpreterShowCreateQuery>(query, context);
     }
     else if (query->as<ASTDescribeQuery>())
     {
+        // TODO desc解释器
         return std::make_unique<InterpreterDescribeQuery>(query, context);
     }
     else if (query->as<ASTExplainQuery>())
     {
+        // TODO explain解释器
         return std::make_unique<InterpreterExplainQuery>(query, context);
     }
     else if (query->as<ASTShowProcesslistQuery>())
     {
+        // TODO show processlist解释器
         return std::make_unique<InterpreterShowProcesslistQuery>(query, context);
     }
     else if (query->as<ASTAlterQuery>())
     {
+        // TODO Alter DDL解释器
         return std::make_unique<InterpreterAlterQuery>(query, context);
     }
     else if (query->as<ASTCheckQuery>())
     {
+        // TODO check解释器
         return std::make_unique<InterpreterCheckQuery>(query, context);
     }
     else if (query->as<ASTKillQueryQuery>())
     {
+        // TODO Kill解释器
         return std::make_unique<InterpreterKillQueryQuery>(query, context);
     }
     else if (query->as<ASTSystemQuery>())
     {
+        // TODO 系统命令解释器
         return std::make_unique<InterpreterSystemQuery>(query, context);
     }
     else if (query->as<ASTWatchQuery>())
     {
+        // TODO watch解释器
         return std::make_unique<InterpreterWatchQuery>(query, context);
     }
     else if (query->as<ASTCreateUserQuery>())
     {
+        // TODO create user解释器
         return std::make_unique<InterpreterCreateUserQuery>(query, context);
     }
     else if (query->as<ASTCreateRoleQuery>())
     {
+        // TODO create role解释器
         return std::make_unique<InterpreterCreateRoleQuery>(query, context);
     }
     else if (query->as<ASTCreateQuotaQuery>())
     {
+        // TODO create quota解释器
         return std::make_unique<InterpreterCreateQuotaQuery>(query, context);
     }
     else if (query->as<ASTCreateRowPolicyQuery>())
     {
+        // TODO create row policy解释器
         return std::make_unique<InterpreterCreateRowPolicyQuery>(query, context);
     }
     else if (query->as<ASTCreateSettingsProfileQuery>())
     {
+        // TODO create setting解释器
         return std::make_unique<InterpreterCreateSettingsProfileQuery>(query, context);
     }
     else if (query->as<ASTDropAccessEntityQuery>())
@@ -238,6 +270,7 @@ std::unique_ptr<IInterpreter> InterpreterFactory::get(ASTPtr & query, ContextPtr
     }
     else if (query->as<ASTGrantQuery>())
     {
+        // TODO grant解释器
         return std::make_unique<InterpreterGrantQuery>(query, context);
     }
     else if (query->as<ASTShowCreateAccessEntityQuery>())

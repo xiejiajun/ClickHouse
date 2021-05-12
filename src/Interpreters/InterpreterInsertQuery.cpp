@@ -56,7 +56,7 @@ InterpreterInsertQuery::InterpreterInsertQuery(
     checkStackSize();
 }
 
-
+// TODO 获取要写入的表信息
 StoragePtr InterpreterInsertQuery::getTable(ASTInsertQuery & query)
 {
     if (query.table_function)
@@ -149,7 +149,7 @@ static bool isTrivialSelect(const ASTPtr & select)
     return false;
 };
 
-
+// TODO 执行写入操作
 BlockIO InterpreterInsertQuery::execute()
 {
     const Settings & settings = getContext()->getSettingsRef();
@@ -157,6 +157,7 @@ BlockIO InterpreterInsertQuery::execute()
 
     BlockIO res;
 
+    // TODO 获取目标表
     StoragePtr table = getTable(query);
     auto table_lock = table->lockForShare(getContext()->getInitialQueryId(), settings.lock_acquire_timeout);
     auto metadata_snapshot = table->getInMemoryMetadataPtr();
@@ -271,6 +272,10 @@ BlockIO InterpreterInsertQuery::execute()
             if (table->noPushingToViews() && !no_destination)
                 out = table->write(query_ptr, metadata_snapshot, getContext());
             else
+                // TODO 写入入口？
+                //  PushingToViewsBlockOutputStream的会先写入更低层的BlockOutputStream, 然后查看一下写入的数据源是否有
+                //  MaterialView,若有，调用process方法用MaterializingBlockInputStream往相关的MaterialView写入数据。
+                //  而PushingToViewsBlockOutputStream更低层的BlockOutputStream是 getTable 方法获取的IStorage对象提供的。
                 out = std::make_shared<PushingToViewsBlockOutputStream>(table, metadata_snapshot, getContext(), query_ptr, no_destination);
 
             /// Note that we wrap transforms one on top of another, so we write them in reverse of data processing order.

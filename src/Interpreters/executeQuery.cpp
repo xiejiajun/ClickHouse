@@ -533,6 +533,7 @@ static std::tuple<ASTPtr, BlockIO> executeQueryImpl(
 
         // TODO 上面都是一些执行计划解析&优化的逻辑，这里是根据SQL类型获取对应的解释器
         //  InterpreterFactory工厂类根据AST生成 执行器Interpreter类实例来执行。 据说MySQL也是这个流程？
+        //  例如：Insert语句最终使用InterpreterInsertQuery执行，Select语句最终使用InterpreterSelectQuery执行
         auto interpreter = InterpreterFactory::get(ast, context, SelectQueryOptions(stage).setInternal(internal));
 
         std::shared_ptr<const EnabledQuota> quota;
