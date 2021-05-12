@@ -17,7 +17,11 @@ namespace DB
 struct Progress;
 
 /** Interface of stream for writing data (into table, filesystem, network, terminal, etc.)
-  */
+ * TODO 不同的Stream可以组合起来完成数据的转化。比如最初的 IBlockInputStream外层套一个 FilterBlockInputStream过滤掉不符合条件的数据，
+ *  再接一个AggregatingBlockInputStream将原始数据聚合给下一个 IBlockInputStream。其实Block Stream类似TiDB里面的算子,
+ *  或者类比Python的迭代器，最外层不断调用 read/write方法驱动整个计算的进行。
+ *  也类似于Spark的RDD，子RDD不断调用compute方法拉取父RDD计算的结果，然后执行自己特定的过滤/聚合等逻辑后再丢给自己的子RDD
+ */
 class IBlockOutputStream : private boost::noncopyable
 {
 public:

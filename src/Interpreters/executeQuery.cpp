@@ -344,6 +344,7 @@ static void setQuerySpecificSettings(ASTPtr & ast, ContextPtr context)
     }
 }
 
+// TODO 执行SQL的入口
 static std::tuple<ASTPtr, BlockIO> executeQueryImpl(
     const char * begin,
     const char * end,
@@ -376,12 +377,14 @@ static std::tuple<ASTPtr, BlockIO> executeQueryImpl(
 #if !defined(ARCADIA_BUILD)
         if (settings.use_antlr_parser)
         {
+            // TODO 将SQL解析成抽象语法树
             ast = parseQuery(begin, end, max_query_size, settings.max_parser_depth, context->getCurrentDatabase());
         }
         else
         {
             ParserQuery parser(end);
 
+            // TODO 将SQL解析成抽象语法树
             /// TODO: parser should fail early when max_query_size limit is reached.
             ast = parseQuery(parser, begin, end, "", max_query_size, settings.max_parser_depth);
         }
@@ -528,6 +531,8 @@ static std::tuple<ASTPtr, BlockIO> executeQueryImpl(
             /// reset Input callbacks if query is not INSERT SELECT
             context->resetInputCallbacks();
 
+        // TODO 上面都是一些执行计划解析&优化的逻辑，这里是根据SQL类型获取对应的解释器
+        //  InterpreterFactory工厂类根据AST生成 执行器Interpreter类实例来执行。 据说MySQL也是这个流程？
         auto interpreter = InterpreterFactory::get(ast, context, SelectQueryOptions(stage).setInternal(internal));
 
         std::shared_ptr<const EnabledQuota> quota;
@@ -558,6 +563,14 @@ static std::tuple<ASTPtr, BlockIO> executeQueryImpl(
 
         {
             OpenTelemetrySpanHolder span("IInterpreter::execute()");
+            // TODO 使用解释器运行执行计划
+            //  返回到结果 res 是一个 BlockIO, BlockIO 其实就是一个 BlockInputStream和BlockOutputStream的一个封装。
+            //  这里就引出了 Clickhouse 里面的一些重要概念。
+            //  Clickhouse是面向OLAP的列存储数据库系统，数据的存储和读写都是批量处理的。根据文档, 一个Block代表着一批的数据，
+            //  内部是用列来划分的，也就是一个(IColumn, IDataType, column name)三元组的集合。Clickhouse的数据处理都是以
+            //  Block为单位的，而Clickhouse的高性能也得益于能够使用向量化技术一次批量的处理一个Block里同类型的数据。
+            //  而 Block Stream就是一个个 Block 组成的数据流。Block Stream分为两种，负责数据写入的实现 IBlockOutputStream接口，
+            //  通过write方法写入一个Block。负责数据读取的实现 IBlockInputStream接口，通过read方法读取一个Block。
             res = interpreter->execute();
         }
 
@@ -916,6 +929,7 @@ BlockIO executeQuery(
 {
     ASTPtr ast;
     BlockIO streams;
+    // TODO 执行SQL入口
     std::tie(ast, streams) = executeQueryImpl(query.data(), query.data() + query.size(), context,
         internal, stage, !may_have_embedded_data, nullptr);
 
