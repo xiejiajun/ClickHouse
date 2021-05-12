@@ -137,8 +137,10 @@ String InterpreterSelectQuery::generateFilterActions(ActionsDAGPtr & actions, co
     table_expr->children.push_back(table_expr->database_and_table_name);
 
     /// Using separate expression analyzer to prevent any possible alias injection
+    //对AST做进一步语法分析，对语法树做优化重写
     auto syntax_result = TreeRewriter(context).analyzeSelect(query_ast, TreeRewriterResult({}, storage, metadata_snapshot));
     SelectQueryExpressionAnalyzer analyzer(query_ast, syntax_result, context, metadata_snapshot);
+    //每一种Query都会对应一个特有的表达式分析器,用于爬取AST生成执行计划(操作链)
     actions = analyzer.simpleSelectActions();
 
     auto column_name = expr_list->children.at(0)->getColumnName();
@@ -883,6 +885,7 @@ void InterpreterSelectQuery::executeImpl(QueryPlan & query_plan, const BlockInpu
      */
 
     /// Now we will compose block streams that perform the necessary actions.
+    //获取AST
     auto & query = getSelectQuery();
     const Settings & settings = context->getSettingsRef();
     auto & expressions = analysis_result;

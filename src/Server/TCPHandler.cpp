@@ -101,6 +101,7 @@ void TCPHandler::runImpl()
     socket().setSendTimeout(global_send_timeout);
     socket().setNoDelay(true);
 
+    //实例化套接字对应的输入和输出流缓冲区
     in = std::make_shared<ReadBufferFromPocoSocket>(socket());
     out = std::make_shared<WriteBufferFromPocoSocket>(socket());
 
@@ -211,6 +212,7 @@ void TCPHandler::runImpl()
              *  There may come settings for a separate query that modify `query_context`.
              *  It's possible to receive part uuids packet before the query, so then receivePacket has to be called twice.
              */
+            // 接收请求报文
             if (!receivePacket())
                 continue;
 
@@ -322,6 +324,8 @@ void TCPHandler::runImpl()
             {
                 state.need_receive_data_for_insert = true;
                 // TODO 将结果返回给client
+                //  根据Query种类来处理不同的Query
+                //  处理insert Query
                 processInsertQuery(connection_settings);
             }
             else if (state.need_receive_data_for_input) // It implies pipeline execution
@@ -331,10 +335,10 @@ void TCPHandler::runImpl()
                 executor->execute(state.io.pipeline.getNumThreads());
             }
             else if (state.io.pipeline.initialized())
-                // TODO 将结果返回给client
+                // TODO 将结果返回给client: 并发处理普通Query
                 processOrdinaryQueryWithProcessors();
             else if (state.io.in)
-                // TODO 将结果返回给client: 这也是读取最外层BlockStream的地方
+                // TODO 将结果返回给client: 这也是读取最外层BlockStream的地方, 单线程处理普通Query
                 processOrdinaryQuery();
 
             state.io.onFinish();
@@ -609,6 +613,7 @@ void TCPHandler::processOrdinaryQuery()
             sendData(header);
 
         /// Use of async mode here enables reporting progress and monitoring client cancelling the query
+        //把BlockStream封装成异步的Stream,那么从流中读取数据将会是异步操作
         AsynchronousBlockInputStream async_in(state.io.in);
 
         async_in.readPrefix();
@@ -631,6 +636,7 @@ void TCPHandler::processOrdinaryQuery()
 
             if (async_in.poll(query_context->getSettingsRef().interactive_delay / 1000))
             {
+                //从IO流读取block数据
                 const auto block = async_in.read();
                 if (!block)
                     break;
@@ -1489,6 +1495,7 @@ bool TCPHandler::isQueryCancelled()
 
 void TCPHandler::sendData(const Block & block)
 {
+    //初始化OutputStream的参数
     initBlockOutput(block);
 
     auto prev_bytes_written_out = out->count();
@@ -1517,6 +1524,7 @@ void TCPHandler::sendData(const Block & block)
             std::this_thread::sleep_for(ms);
         }
 
+        // 调用BlockOutputStream的write函数,把Block写到输出流
         state.block_out->write(block);
         state.maybe_compressed_out->next();
         out->next();

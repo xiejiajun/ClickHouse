@@ -564,7 +564,7 @@ static std::tuple<ASTPtr, BlockIO> executeQueryImpl(
 
         {
             OpenTelemetrySpanHolder span("IInterpreter::execute()");
-            // TODO 使用解释器运行执行计划
+            // TODO 使用解释器解析AST, 结果是BlockIO
             //  返回到结果 res 是一个 BlockIO, BlockIO 其实就是一个 BlockInputStream和BlockOutputStream的一个封装。
             //  这里就引出了 Clickhouse 里面的一些重要概念。
             //  Clickhouse是面向OLAP的列存储数据库系统，数据的存储和读写都是批量处理的。根据文档, 一个Block代表着一批的数据，
@@ -917,6 +917,7 @@ static std::tuple<ASTPtr, BlockIO> executeQueryImpl(
         throw;
     }
 
+    // TODO 返回结果是抽象语法树和解析后的结果组成的二元组, std::move将res转换成右值
     return std::make_tuple(ast, std::move(res));
 }
 

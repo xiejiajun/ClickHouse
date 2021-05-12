@@ -305,6 +305,7 @@ Poco::Net::SocketAddress makeSocketAddress(const std::string & host, UInt16 port
     return socket_address;
 }
 
+//绑定端口,对外提供服务
 Poco::Net::SocketAddress Server::socketBindListen(Poco::Net::ServerSocket & socket, const std::string & host, UInt16 port, [[maybe_unused]] bool secure) const
 {
     auto address = makeSocketAddress(host, port, &logger());
@@ -479,6 +480,7 @@ int Server::main(const std::vector<std::string> & /*args*/)
     /** Context contains all that query execution is dependent:
       *  settings, available functions, data types, aggregate functions, databases, ...
       */
+    // TODO 1. 初始化上下文
     auto shared_context = Context::createShared();
     global_context = Context::createGlobal(shared_context.get());
 
@@ -492,6 +494,7 @@ int Server::main(const std::vector<std::string> & /*args*/)
 
     bool has_zookeeper = config().has("zookeeper");
 
+    // TODO 2. zk初始化
     zkutil::ZooKeeperNodeCache main_config_zk_node_cache([&] { return global_context->getZooKeeper(); });
     zkutil::EventPtr main_config_zk_changed_event = std::make_shared<Poco::Event>();
     if (loaded_config.has_zk_includes)
@@ -1189,6 +1192,9 @@ int Server::main(const std::vector<std::string> & /*args*/)
 #endif
             });
 
+            // TODO 根据网络协议建立不同的server类型
+            //  现在支持的server类型有： HTTP,HTTPS,TCP,Interserver,mysql
+            //  以TCP版本为例:
             /// TCP
             port_name = "tcp_port";
             createServer(listen_host, port_name, listen_try, [&](UInt16 port)
@@ -1413,6 +1419,9 @@ int Server::main(const std::vector<std::string> & /*args*/)
                                                                      "distributed_ddl", "DDLWorker", &CurrentMetrics::MaxDDLEntryID));
         }
 
+        // TODO 启动server,
+        //  客户端发来的请求是由各自网络协议所对应的 Handler 来进行的，server在启动的时候 Handler 会被初始化并绑定在指定端口中。
+        //  我们以TCPHandler为例，看看服务端是如何处理客户端发来的请求的，重点关注 TCPHandler::runImpl 的函数实现:
         for (auto & server : *servers)
             server.start();
         LOG_INFO(log, "Ready for connections.");

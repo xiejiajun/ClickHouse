@@ -98,6 +98,7 @@ std::unique_ptr<IInterpreter> InterpreterFactory::get(ASTPtr & query, ContextPtr
 
     ProfileEvents::increment(ProfileEvents::Query);
 
+    // TODO 举个例子,如果该AST是由select语句转化过来,
     if (query->as<ASTSelectQuery>())
     {
         /// This is internal part of ASTSelectWithUnionQuery.

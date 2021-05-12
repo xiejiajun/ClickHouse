@@ -50,6 +50,7 @@ ASTPtr parseQuery(const char * begin, const char * end, size_t, size_t, const St
     UnbufferedCharStream input(stream, size);
     ClickHouseLexer lexer(&input);
     CommonTokenStream tokens(&lexer);
+    // TODO 构造Parser 基于Antlr4 老版本是自己实现的ParseQuery
     ClickHouseParser parser(&tokens);
     LexerErrorListener lexer_error_listener;
     ParserErrorListener parser_error_listener;

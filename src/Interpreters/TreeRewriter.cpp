@@ -891,6 +891,7 @@ TreeRewriterResultPtr TreeRewriter::analyzeSelect(
         result.analyzed_join = std::make_shared<TableJoin>();
 
     if (remove_duplicates)
+        // TODO 剔除冗余列
         renameDuplicatedColumns(select_query);
 
     if (tables_with_columns.size() > 1)
@@ -903,6 +904,7 @@ TreeRewriterResultPtr TreeRewriter::analyzeSelect(
     translateQualifiedNames(query, *select_query, source_columns_set, tables_with_columns);
 
     /// Optimizes logical expressions.
+    // TODO  优化Query内部的布尔表达式
     LogicalExpressionsOptimizer(select_query, settings.optimize_min_equality_disjunction_chain_length.value).perform();
 
     NameSet all_source_columns_set = source_columns_set;
@@ -918,9 +920,11 @@ TreeRewriterResultPtr TreeRewriter::analyzeSelect(
     /// Leave all selected columns in case of DISTINCT; columns that contain arrayJoin function inside.
     /// Must be after 'normalizeTree' (after expanding aliases, for aliases not get lost)
     ///  and before 'executeScalarSubqueries', 'analyzeAggregation', etc. to avoid excessive calculations.
+    // 消除select从句后的冗余列
     removeUnneededColumnsFromSelectClause(select_query, required_result_columns, remove_duplicates);
 
     /// Executing scalar subqueries - replacing them with constant values.
+    // 执行标量子查询，并且用常量替代标量子查询结果
     executeScalarSubqueries(query, getContext(), subquery_depth, result.scalars, select_options.only_analyze);
 
     TreeOptimizer::apply(
@@ -1041,6 +1045,7 @@ void TreeRewriter::normalize(ASTPtr & query, Aliases & aliases, const NameSet & 
     CustomizeAggregateFunctionsMoveOrNullVisitor(data_or_null).visit(query);
 
     /// Creates a dictionary `aliases`: alias -> ASTPtr
+    // TODO 创建一个从别名到AST节点的映射字典
     QueryAliasesVisitor(aliases).visit(query);
 
     /// Mark table ASTIdentifiers with not a column marker
@@ -1052,6 +1057,7 @@ void TreeRewriter::normalize(ASTPtr & query, Aliases & aliases, const NameSet & 
         FunctionNameNormalizer().visit(query.get());
 
     /// Common subexpression elimination. Rewrite rules.
+    // 公共子表达式的消除
     QueryNormalizer::Data normalizer_data(aliases, source_columns_set, settings);
     QueryNormalizer(normalizer_data).visit(query);
 }
