@@ -1,2 +1,2 @@
 - [Clickhouse源码导读](http://sineyuan.github.io/post/clickhouse-source-guide/)
-- [ClickHouse 源码阅读 —— SQL的前世今生](https://developer.aliyun.com/article/765184)
+- [ClickHouse 源码阅读 —— SQL的前世今生](https://developer.aliyun.com/article/765184)： 必看，从一条SQL的执行串通了ClickHouse的整体架构
