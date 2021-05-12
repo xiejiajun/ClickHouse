@@ -164,6 +164,7 @@ int mainEntryClickHouseServer(int argc, char ** argv)
 
     try
     {
+        // TODO 启动Server
         return app.run(argc, argv);
     }
     catch (...)
@@ -361,6 +362,7 @@ void Server::uninitialize()
     BaseDaemon::uninitialize();
 }
 
+// TODO 启动Server
 int Server::run()
 {
     if (config().hasOption("help"))
@@ -378,6 +380,7 @@ int Server::run()
         std::cout << DBMS_NAME << " server version " << VERSION_STRING << VERSION_OFFICIAL << "." << std::endl;
         return 0;
     }
+    // TODO -> Server::main
     return Application::run(); // NOLINT
 }
 
@@ -442,6 +445,7 @@ void checkForUsersNotInMainConfig(
 }
 
 
+// TODO ClickHouse Server具体入口
 int Server::main(const std::vector<std::string> & /*args*/)
 {
     Poco::Logger * log = &logger();

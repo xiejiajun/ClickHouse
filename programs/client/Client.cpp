@@ -302,6 +302,7 @@ private:
     }
 
 
+    // TODO ClickHouse Client具体入口
     int main(const std::vector<std::string> & /*args*/) override
     {
         try
@@ -559,6 +560,7 @@ private:
         client_info.setInitialQuery();
         client_info.quota_key = config().getString("quota_key", "");
 
+        // TODO 连接Server
         connect();
 
         /// Initialize DateLUT here to avoid counting time spent here as query execution time.

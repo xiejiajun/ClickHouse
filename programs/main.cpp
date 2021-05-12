@@ -76,6 +76,7 @@ int mainEntryClickHouseHashBinary(int, char **)
 namespace
 {
 
+// TODO 入参为int和二级字符指针, 返回值为int的函数指针
 using MainFunc = int (*)(int, char**);
 
 
@@ -92,6 +93,7 @@ std::pair<const char *, MainFunc> clickhouse_applications[] =
     {"benchmark", mainEntryClickHouseBenchmark},
 #endif
 #if ENABLE_CLICKHOUSE_SERVER
+        // TODO ClickHouse Server启动入口
     {"server", mainEntryClickHouseServer},
 #endif
 #if ENABLE_CLICKHOUSE_EXTRACT_FROM_CONFIG
@@ -336,7 +338,7 @@ struct Checker
 /// class C { C() { assert(inside_main); } };
 bool inside_main = false;
 
-
+// TODO ClickHouse所有服务的启动入口，不同的服务通过宏变量指定不同的MainFunc
 int main(int argc_, char ** argv_)
 {
     inside_main = true;
