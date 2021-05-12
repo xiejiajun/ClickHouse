@@ -334,7 +334,7 @@ void TCPHandler::runImpl()
                 // TODO 将结果返回给client
                 processOrdinaryQueryWithProcessors();
             else if (state.io.in)
-                // TODO 将结果返回给client
+                // TODO 将结果返回给client: 这也是读取最外层BlockStream的地方
                 processOrdinaryQuery();
 
             state.io.onFinish();
@@ -592,6 +592,7 @@ void TCPHandler::processInsertQuery(const Settings & connection_settings)
 }
 
 
+// TODO 读取最外层BlockStream的地方
 void TCPHandler::processOrdinaryQuery()
 {
     OpenTelemetrySpanHolder span(__PRETTY_FUNCTION__);
@@ -634,6 +635,7 @@ void TCPHandler::processOrdinaryQuery()
                 if (!block)
                     break;
 
+                // TODO 发送到客户端
                 if (!state.io.null_format)
                     sendData(block);
             }

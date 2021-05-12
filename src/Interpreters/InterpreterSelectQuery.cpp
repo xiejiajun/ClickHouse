@@ -543,6 +543,7 @@ InterpreterSelectQuery::InterpreterSelectQuery(
 
 void InterpreterSelectQuery::buildQueryPlan(QueryPlan & query_plan)
 {
+    // TODO 执行？
     executeImpl(query_plan, input, std::move(input_pipe));
 
     /// We must guarantee that result structure is the same as in getSampleBlock()
@@ -564,6 +565,7 @@ BlockIO InterpreterSelectQuery::execute()
     BlockIO res;
     QueryPlan query_plan;
 
+    // TODO 构建执行计划
     buildQueryPlan(query_plan);
 
     res.pipeline = std::move(*query_plan.buildQueryPipeline(
@@ -867,6 +869,7 @@ static bool hasWithTotalsInAnySubqueryInFromClause(const ASTSelectQuery & query)
 }
 
 
+// TODO 重点方法，SQL整体逻辑计算都在里面体现了
 void InterpreterSelectQuery::executeImpl(QueryPlan & query_plan, const BlockInputStreamPtr & prepared_input, std::optional<Pipe> prepared_pipe)
 {
     /** Streams of data. When the query is executed in parallel, we have several data streams.
@@ -994,12 +997,14 @@ void InterpreterSelectQuery::executeImpl(QueryPlan & query_plan, const BlockInpu
         if (options.to_stage == QueryProcessingStage::WithMergeableStateAfterAggregation)
             to_aggregation_stage = true;
 
+        // TODO 从storage里面读取最底层的IBlockInputStream
         /// Read the data from Storage. from_stage - to what stage the request was completed in Storage.
         executeFetchColumns(from_stage, query_plan);
 
         LOG_TRACE(log, "{} -> {}", QueryProcessingStage::toString(from_stage), QueryProcessingStage::toString(options.to_stage));
     }
 
+    // TODO executeFetchColumns方法取出数据后会调用各种executeXXX方法再给套上各种数据处理的BlockStream。
     if (options.to_stage > QueryProcessingStage::FetchColumns)
     {
         /// Do I need to aggregate in a separate row rows that have not passed max_rows_to_group_by.
@@ -1029,9 +1034,11 @@ void InterpreterSelectQuery::executeImpl(QueryPlan & query_plan, const BlockInpu
                 && !expressions.has_window)
             {
                 if (expressions.has_order_by)
+                    // TODO 套上排序逻辑
                     executeOrder(query_plan, query_info.input_order_info);
 
                 if (expressions.has_order_by && query.limitLength())
+                    // TODO 套上Distinct逻辑
                     executeDistinct(query_plan, false, expressions.selected_columns, true);
 
                 if (expressions.hasLimitBy())
@@ -1052,6 +1059,7 @@ void InterpreterSelectQuery::executeImpl(QueryPlan & query_plan, const BlockInpu
 
             preliminary_sort();
             if (expressions.need_aggregate)
+                // TODO 套上聚合逻辑
                 executeMergeAggregated(query_plan, aggregate_overflow_row, aggregate_final);
         }
         if (from_aggregation_stage)
@@ -1128,6 +1136,7 @@ void InterpreterSelectQuery::executeImpl(QueryPlan & query_plan, const BlockInpu
             }
 
             if (expressions.hasWhere())
+                // TODO 套上Where条件
                 executeWhere(query_plan, expressions.before_where, expressions.remove_where_filter);
 
             if (expressions.need_aggregate)
@@ -1160,6 +1169,7 @@ void InterpreterSelectQuery::executeImpl(QueryPlan & query_plan, const BlockInpu
                 // now, on shard (first_stage).
                 if (query_analyzer->hasWindow())
                 {
+                    // TODO 套上算术/逻辑表达式执行逻辑
                     executeExpression(query_plan, expressions.before_window, "Before window functions");
                 }
                 else
@@ -1177,6 +1187,7 @@ void InterpreterSelectQuery::executeImpl(QueryPlan & query_plan, const BlockInpu
 
             // If there is no global subqueries, we can run subqueries only when receive them on server.
             if (!query_analyzer->hasGlobalSubqueries() && !subqueries_for_sets.empty())
+                // TODO 子查询 / Join逻辑
                 executeSubqueriesInSetsAndJoins(query_plan, subqueries_for_sets);
         }
 
@@ -1186,6 +1197,7 @@ void InterpreterSelectQuery::executeImpl(QueryPlan & query_plan, const BlockInpu
             {
                 /// No need to aggregate anything, since this was done on remote shards.
             }
+            // TODO 套上聚合逻辑
             else if (expressions.need_aggregate)
             {
                 /// If you need to combine aggregated results from multiple servers
@@ -1803,6 +1815,7 @@ void InterpreterSelectQuery::executeFetchColumns(QueryProcessingStage::Enum proc
         if (!options.ignore_quota && (options.to_stage == QueryProcessingStage::Complete))
             quota = context->getQuota();
 
+        // TODO 跟写入过程类似, StorageMergeTree调用封装了MergeTreeData的MergeTreeDataSelectExecutor的read方法从存储里面获取数据。
         storage->read(query_plan, required_columns, metadata_snapshot,
                       query_info, context, processing_stage, max_block_size, max_streams);
 
