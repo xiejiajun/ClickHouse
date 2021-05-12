@@ -1,5 +1,10 @@
 #include <Interpreters/ExpressionJIT.h>
 
+// TODO JIT
+//  其实我们只要在代码里面搜USE_EMBEDDED_COMPILER这个编译宏就可以找出所有JIT相关的代码。
+//  最主要的地方在dbms/src/Interpreters/ExpressionJIT.cpp里面。
+//  若是开启了USE_EMBEDDED_COMPILER， compileFunctions函数会将复杂的表达式即时编译成机器码执行,
+//  Clickhouse会缓存编译结果，由此提高性能。
 #if USE_EMBEDDED_COMPILER
 
 #include <optional>
