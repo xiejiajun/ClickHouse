@@ -309,7 +309,8 @@ void TCPHandler::runImpl()
 
             bool may_have_embedded_data = client_tcp_protocol_version >= DBMS_MIN_REVISION_WITH_CLIENT_SUPPORT_EMBEDDED_DATA;
             /// Processing Query
-            // TODO 处理Query请求入口
+            // TODO 处理Query请求入口：
+            //  client发送的sql在 executeQuery 函数处理，processInsertQuery 和 processOrdinaryQuery 负责将结果返回给client。
             state.io = executeQuery(state.query, query_context, false, state.stage, may_have_embedded_data);
 
             unknown_packet_in_send_data = query_context->getSettingsRef().unknown_packet_in_send_data;
@@ -320,7 +321,7 @@ void TCPHandler::runImpl()
             if (state.io.out)
             {
                 state.need_receive_data_for_insert = true;
-                // TODO 处理Insert请求入口
+                // TODO 将结果返回给client
                 processInsertQuery(connection_settings);
             }
             else if (state.need_receive_data_for_input) // It implies pipeline execution
@@ -330,10 +331,10 @@ void TCPHandler::runImpl()
                 executor->execute(state.io.pipeline.getNumThreads());
             }
             else if (state.io.pipeline.initialized())
-                // TODO 处理原始查询入口
+                // TODO 将结果返回给client
                 processOrdinaryQueryWithProcessors();
             else if (state.io.in)
-                // TODO 处理原始查询入口
+                // TODO 将结果返回给client
                 processOrdinaryQuery();
 
             state.io.onFinish();
